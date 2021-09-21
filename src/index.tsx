@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useState } from 'react';
 
-import ilDuce from 'erre-ele';
+import rl from 'erre-ele';
 import { ILaGuaGua, Handler } from 'laguagua';
 import { IMechanism, State as MechanismState, ToState as MechanismToState, OnEnterDataResponse } from './mechanism';
 
@@ -17,7 +17,7 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
   const [content, setContent] = useState<JSX.Element>();
 
   const getStateIdFromURL = useCallback((): string => {
-    const pathname = ilDuce.getPathnameFromURL();
+    const pathname = rl.getPathnameFromURL();
     const pathsSegments = pathname.split('/');
     return pathsSegments[1];
   }, []);
@@ -26,9 +26,9 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
     const stateId = getStateIdFromURL();
 
     if (stateId) {
-      ilDuce.pathname = '/' + stateId;
+      rl.pathname = '/' + stateId;
     } else {
-      ilDuce.pathname = '/';
+      rl.pathname = '/';
     }
   }, [getStateIdFromURL]);
 
@@ -36,12 +36,12 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
     setCurrentPath();
   }, [setCurrentPath]);
 
-  ilDuce.setOnPopState(onHistoryChange);
+  rl.setOnPopState(onHistoryChange);
 
   const setCurrentState = useCallback(() => {
     const initialState = mechanism.getState(initial);
 
-    if (ilDuce.pathname === '/' || ilDuce.pathname === '/' + initialState?.id) {
+    if (rl.pathname === '/' || rl.pathname === '/' + initialState?.id) {
       mechanism.currentId = initialState?.id;
     } else {
       const stateId = getStateIdFromURL();
@@ -64,7 +64,7 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
     }
 
     state?.params?.forEach((paramName: string) => {
-      const paramValue = ilDuce.getParamFromURL(paramName);
+      const paramValue = rl.getParamFromURL(paramName);
 
       if (paramName && paramValue) {
         params?.set(paramName, paramValue);
@@ -109,14 +109,14 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
         const isStateToTransitionPrivate = mechanism.isPrivate(stateToTransitionTo);
 
         if ((isStateToTransitionPrivate && userIsLogged) || !isStateToTransitionPrivate) {
-          ilDuce.go('/' + stateToTransitionTo.id);
+          rl.go('/' + stateToTransitionTo.id);
           mechanism.currentId = stateToTransitionTo?.id;
 
           if (transition?.onEnter) {
             transition.onEnter(data);
           }
         } else {
-          ilDuce.go('/');
+          rl.go('/');
         }
       }
 
