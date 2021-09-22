@@ -34,7 +34,7 @@ In order to install this peer dependencies, you need an npm version up to 7.x.
 
 This peer dependencies are installed by the `npm install` command.
 
-## Usage
+## Tasks
 
 ### Buid
 
@@ -92,4 +92,66 @@ Format your code syntax with:
 
 ```shell
 npm run format
+```
+
+## Usage
+
+### Basic example
+
+```
+           ┌─────────────────────┐                 ┌───────────────────┐
+           │                     │                 │                   │
+           │                     │ go::componentB  │                   │
+  ┌───────►│     StateA          ├────────────────►│      StateB       ├────────┐
+  │        │                     │                 │                   │        │
+  │        │                     │                 │                   │        │
+  │        └─────────────────────┘                 └───────────────────┘        │
+  │                                                                             │
+  │                                                                             │
+  │                                                                             │
+  │                                                                             │
+  │                                                                             │
+  └─────────────────────────────────────────────────────────────────────────────┘
+                                 go::componentA
+
+```
+
+```typescript
+import React from 'react';
+
+// import the react against the machine pieces
+import Machine, { State, Transition, Content, mechanism } from 'react-against-the-machine';
+// import any bus that implements the ILaguagua interface
+import { laGuaGua as bus } from 'laguagua';
+
+import ComponentA from './componentA';
+import ComponentB from './componentB';
+
+const App = () => {
+  const onTransitionToComponentB = (): void => {
+    console.log('Hey we are in component B');
+  };
+
+  return (
+    <>
+      <Machine initial="componentA" bus={bus}>
+        <State id="componentA" private={false}>
+          <Transition event="go::componentB" state="componentB" onEnter={onTransitionToComponentB} />
+          <Content>
+            <ComponentA />
+          </Content>
+        </State>
+
+        <State id="componentB" private={false}>
+          <Transition event="go::componentA" state="componentA" />
+          <Content>
+            <ComponentB />
+          </Content>
+        </State>
+      </Machine>
+    </>
+  );
+};
+
+export default App;
 ```
