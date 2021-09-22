@@ -2,18 +2,17 @@ import React, { useEffect, useCallback, useState } from 'react';
 
 import rl from 'erre-ele';
 import { ILaGuaGua, Handler } from 'laguagua';
-import { IMechanism, State as MechanismState, ToState as MechanismToState, OnEnterDataResponse } from './mechanism';
+import { mechanism, State as MechanismState, ToState as MechanismToState, OnEnterDataResponse } from './mechanism';
 
 interface IStateMachineProps {
   initial: string;
   bus: ILaGuaGua;
-  mechanism: IMechanism;
   logged: boolean;
   children: JSX.Element[];
 }
 
 export default function Machine(props: IStateMachineProps): JSX.Element {
-  const { initial, bus, children, mechanism, logged: userIsLogged } = props;
+  const { initial, bus, children, logged: userIsLogged } = props;
   const [content, setContent] = useState<JSX.Element>();
 
   const getStateIdFromURL = useCallback((): string => {
