@@ -120,7 +120,7 @@ npm run format
 import React from 'react';
 
 // import the react against the machine pieces
-import Machine, { State, Transition, Content, mechanism } from 'react-against-the-machine';
+import Machine, { State, Transition, Content } from 'react-against-the-machine';
 // import any bus that implements the ILaguagua interface
 import { laGuaGua as bus } from 'laguagua';
 
