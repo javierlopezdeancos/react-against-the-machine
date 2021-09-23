@@ -2,6 +2,22 @@
 
 An state machine to react.
 
+## Summary
+
+- [Instalation](#installation)
+- [Node and npm version](#node-and-npm-version)
+- [Peer dependencies](#peer-dependencies)
+- [Tasks](#taks)
+  - [Build](#build)
+  - [Test](#test)
+  - [Test watch](#test-watch)
+  - [Test coverage](#test-coverage)
+  - [Lint](#lint)
+  - [Lint fix](#lint-fix)
+  - [Format](#format)
+- [Usage](#usage)
+  - [Basic example](#basic-example)
+
 ## Installation
 
 ```shell
