@@ -15,6 +15,16 @@ An state machine to react.
   - [Lint](#lint)
   - [Lint fix](#lint-fix)
   - [Format](#format)
+- [Pieces](#pieces)
+  - [Components hierarchy](#components-hierarchy)
+  - [Machine](#machine)
+    - [Machine props](#machine-props)
+      - [IBus interface](#ibus-interface)
+  - [State](#state)
+    - [State props](#state-props)
+  - [Transmition](#transmition)
+    - [Transmition props](#transmition-props)
+  - [Context](#context)
 - [Usage](#usage)
   - [Basic example](#basic-example)
 
@@ -110,6 +120,106 @@ Format your code syntax with:
 npm run format
 ```
 
+## Pieces
+
+We have some pieces as react components to represent the states and transitions of the state machine.
+
+- Machine
+- State
+- Content
+- Transition
+
+### Components hierarchy
+
+```
+<Machine>
+  <State>
+    <Content>
+      <ComponentExample />
+    </Content>
+    <Transition />
+  </State>
+</Machine>
+```
+
+### Machine
+
+A react component that represents the state machine wrapper.
+
+```tsx
+import Machine from 'react-against-the-machine';
+import { laGuaGua as bus } from 'laguagua';
+
+<Machine initial="componentA" bus={bus}>
+  <!-- here should be the state machine States -->
+</Machine>
+```
+
+#### Machine props
+
+Machine needs some props:
+
+- initial `string` - the initial state id of the machine.
+- bus `object` - the bus object of the state machine to publish/subscribe events that implement the IBus interface.
+
+##### IBus interface
+
+```tsx
+export type Handler = (message: string, data?: Object) => void;
+
+export interface IBus {
+  publish: (message: string, data?: Object) => void;
+  subscribe: (message: string, trigger: Handler) => void;
+  clear: () => void;
+}
+```
+
+### State
+
+A react component that represents a state of the state machine.
+
+- Any state has a unique id.
+- Any state could have transitions to other states.
+- Any state should have a content react component to render.
+
+```tsx
+import { State } from 'react-against-the-machine';
+
+<State id="componentA" private={false}>
+  <!-- here should be the state machine States -->
+</State>
+```
+
+#### State props
+
+State needs some props:
+
+- id `string` - the state id to this state.
+- private `boolean` _(default true)_ - if is private, the state only render the content if user is logged.
+
+### Transition
+
+A react component that represents a transition to other state
+
+- Transition should be placed inside the `<State />` component that wants to go to another state.
+
+```tsx
+import { Transition } from 'react-against-the-machine';
+
+<Transition event="go::componentA" state="componentA" />;
+```
+
+#### Transition props
+
+Transition needs some props:
+
+- event `string` - the event to trigger this transition.
+- state `string` - the state id to go to.
+
+### Content
+
+A react component that render a react component that be wrapper by when machine is in this state.
+
 ## Usage
 
 ### Basic example
@@ -132,12 +242,12 @@ npm run format
 
 ```
 
-```typescript
+```tsx
 import React from 'react';
 
 // import the react against the machine pieces
 import Machine, { State, Transition, Content } from 'react-against-the-machine';
-// import any bus that implements the ILaguagua interface
+// import any bus that implements the IBus interface
 import { laGuaGua as bus } from 'laguagua';
 
 import ComponentA from './componentA';
@@ -149,23 +259,21 @@ const App = () => {
   };
 
   return (
-    <>
-      <Machine initial="componentA" bus={bus}>
-        <State id="componentA" private={false}>
-          <Content>
-            <ComponentA />
-          </Content>
-          <Transition event="go::componentB" state="componentB" onEnter={onTransitionToComponentB} />
-        </State>
+    <Machine initial="componentA" bus={bus}>
+      <State id="componentA" private={false}>
+        <Content>
+          <ComponentA />
+        </Content>
+        <Transition event="go::componentB" state="componentB" onEnter={onTransitionToComponentB} />
+      </State>
 
-        <State id="componentB" private={false}>
-          <Content>
-            <ComponentB />
-          </Content>
-          <Transition event="go::componentA" state="componentA" />
-        </State>
-      </Machine>
-    </>
+      <State id="componentB" private={false}>
+        <Content>
+          <ComponentB />
+        </Content>
+        <Transition event="go::componentA" state="componentA" />
+      </State>
+    </Machine>
   );
 };
 
