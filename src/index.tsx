@@ -1,12 +1,19 @@
 import React, { useEffect, useCallback, useState } from 'react';
 
 import rl from 'erre-ele';
-import { ILaGuaGua, Handler } from 'laguagua';
 import { mechanism, State as MechanismState, ToState as MechanismToState, OnEnterDataResponse } from './mechanism';
+
+export type Handler = (message: string, data?: Object) => void;
+
+export interface IBus {
+  publish: (message: string, data?: Object) => void;
+  subscribe: (message: string, trigger: Handler) => void;
+  clear: () => void;
+}
 
 interface IStateMachineProps {
   initial: string;
-  bus: ILaGuaGua;
+  bus: IBus;
   logged: boolean;
   children: JSX.Element[];
 }
