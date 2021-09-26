@@ -103,5 +103,9 @@
   "ignorePatterns": ["src/**/*.test.*"],
   "globals": {
     "JSX": "readonly"
+  },
+  "env": {
+    "browser": true,
+    "jest": true
   }
 }

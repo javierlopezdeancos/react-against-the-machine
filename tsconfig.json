@@ -1,17 +1,23 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
     "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
     "outDir": "dist",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
     "sourceMap": true,
+    "strict": true,
     "target": "es6"
   },
-  "files": [
-    "src/index.tsx"
-  ],
-  "exclude": [
-    "test",
-    "node_modules",
-    "dist"
-  ]
+  "files": ["src/index.tsx"],
+  "exclude": ["test", "node_modules", "dist"]
 }
