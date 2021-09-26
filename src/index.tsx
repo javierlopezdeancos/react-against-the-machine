@@ -19,7 +19,7 @@ interface IStateMachineProps {
 }
 
 export default function Machine(props: IStateMachineProps): JSX.Element {
-  const { initial, bus, children, logged: userIsLogged } = props;
+  const { initial, bus, children, logged } = props;
   const [content, setContent] = useState<JSX.Element>();
 
   const getStateIdFromURL = useCallback((): string => {
@@ -114,7 +114,7 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
       if (stateToTransitionTo && transition) {
         const isStateToTransitionPrivate = mechanism.isPrivate(stateToTransitionTo);
 
-        if ((isStateToTransitionPrivate && userIsLogged) || !isStateToTransitionPrivate) {
+        if ((isStateToTransitionPrivate && logged) || !isStateToTransitionPrivate) {
           rl.go('/' + stateToTransitionTo.id);
           mechanism.currentId = stateToTransitionTo?.id;
 
@@ -128,7 +128,7 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
 
       setConfigurationToCurrentState();
     },
-    [mechanism, setConfigurationToCurrentState, userIsLogged]
+    [mechanism, setConfigurationToCurrentState, logged]
   );
 
   const addStateAndTransitionToMechanism = useCallback(
@@ -164,9 +164,25 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
     [mechanism]
   );
 
-  const addContentToStateInMechanism = useCallback(
-    (stateId: string, content: JSX.Element) => {
-      mechanism.setContent(stateId, content);
+  const addStateAndContentToMechanism = useCallback(
+    (
+      stateId: string,
+      isPrivate: boolean,
+      params: string[],
+      onEnter: (params?: Map<string, string>) => void,
+      content: JSX.Element
+    ) => {
+      if (stateId) {
+        mechanism.setState({
+          id: stateId,
+          isPrivate,
+          params,
+          onEnter,
+          to: [] as MechanismToState[],
+        });
+
+        mechanism.setContent(stateId, content);
+      }
     },
     [mechanism]
   );
@@ -183,8 +199,9 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
         if (componentIsAStateComponent) {
           stateComponent?.props?.children.forEach((stateComponentChild: JSX.Element): void | JSX.Element => {
             const componentIsATransitionComponent = stateComponentChild?.type?.name === 'Transition';
+            const componentIsAContentComponent = stateComponentChild?.type?.name === 'Content';
 
-            if (componentIsATransitionComponent) {
+            if (componentIsATransitionComponent && !componentIsAContentComponent) {
               const transitionComponent = stateComponentChild;
 
               addStateAndTransitionToMechanism(
@@ -200,12 +217,14 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
               if (transitionComponent?.props?.event) {
                 bus.subscribe(transitionComponent?.props?.event, messageHandler as Handler);
               }
-            }
-
-            const componentIsAContentComponent = stateComponentChild?.type?.name === 'Content';
-
-            if (componentIsAContentComponent) {
-              addContentToStateInMechanism(stateComponent?.props?.id, stateComponentChild.props.children);
+            } else if (!componentIsATransitionComponent && componentIsAContentComponent) {
+              addStateAndContentToMechanism(
+                stateComponent?.props?.id,
+                stateComponent?.props?.private,
+                stateComponent?.props?.params,
+                stateComponent?.props?.onEnter,
+                stateComponentChild.props.children
+              );
             }
           });
         }
@@ -214,7 +233,7 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
 
     setConfigurationToCurrentState();
   }, [
-    addContentToStateInMechanism,
+    addStateAndContentToMechanism,
     addStateAndTransitionToMechanism,
     bus,
     children,
