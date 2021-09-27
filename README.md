@@ -162,14 +162,17 @@ Machine needs some props:
 - initial `string` - the initial state id of the machine.
 - bus `object` - the bus object of the state machine to publish/subscribe events that implement the IBus interface.
 
+We are using to our example the bus [Laguagua](https://github.com/javierlopezdeancos/laguagua), but you can use any
+other bus event that implements the IBus interface.
+
 ##### IBus interface
 
 ```tsx
-export type Handler = (message: string, data?: Object) => void;
+export type BusHandler = (message: string, data?: Object) => void;
 
 export interface IBus {
   publish: (message: string, data?: Object) => void;
-  subscribe: (message: string, trigger: Handler) => void;
+  subscribe: (message: string, trigger: BusHandler) => void;
   clear: () => void;
 }
 ```

@@ -3,11 +3,11 @@ import React, { useEffect, useCallback, useState } from 'react';
 import rl from 'erre-ele';
 import { mechanism, State as MechanismState, ToState as MechanismToState, OnEnterDataResponse } from './mechanism';
 
-export type Handler = (message: string, data?: Object) => void;
+export type BusHandler = (message: string, data?: Object) => void;
 
 export interface IBus {
   publish: (message: string, data?: Object) => void;
-  subscribe: (message: string, trigger: Handler) => void;
+  subscribe: (message: string, trigger: BusHandler) => void;
   clear: () => void;
 }
 
@@ -215,7 +215,7 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
               );
 
               if (transitionComponent?.props?.event) {
-                bus.subscribe(transitionComponent?.props?.event, messageHandler as Handler);
+                bus.subscribe(transitionComponent?.props?.event, messageHandler as BusHandler);
               }
             } else if (!componentIsATransitionComponent && componentIsAContentComponent) {
               addStateAndContentToMechanism(
