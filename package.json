@@ -1,10 +1,11 @@
 {
   "name": "react-against-the-machine",
   "version": "0.1.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
+  "types": "./lib/esm/index.d.ts",
   "files": [
-    "/dist"
+    "/lib"
   ],
   "engines": {
     "node": ">=16.8.0",
@@ -12,7 +13,9 @@
   },
   "type": "module",
   "scripts": {
-    "build": "npx tsc",
+    "build": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module commonjs --outDir lib/cjs",
     "format": "prettier --write 'src/**/*.{ts,tsx,scss,css,json}'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src --color",
     "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx src --color --fix",

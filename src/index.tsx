@@ -267,6 +267,7 @@ interface ITransitionProps<E> {
   onEnter?: OnEnterDataResponse<E>;
 }
 
+// @ts-expect-error: Let's ignore a compile error
 export function Transition<E>(props: ITransitionProps<E>): null {
   return null;
 }
