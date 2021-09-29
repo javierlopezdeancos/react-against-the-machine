@@ -1,0 +1,18 @@
+version: 2.1
+
+orbs:
+  coveralls: coveralls/coveralls@1.0.6
+
+jobs:
+  analyze-coverage:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - coveralls/upload:
+          path_to_lcov: ./coverage/lcov.info 
+          flag_name: analyle coverage 
+
+workflows:
+  coverage:
+    jobs:
+      - analyze-coverage
