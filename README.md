@@ -3,10 +3,12 @@
 An state machine to react.
 
 ## Activity
+
 [![License](https://img.shields.io/github/license/javierlopezdeancos/react-against-the-machine?style=flat-square)](LICENSE)
 ![GitHub issues](https://img.shields.io/github/issues-raw/javierlopezdeancos/react-against-the-machine?style=flat)
 ![GitHub all releases](https://img.shields.io/github/downloads/javierlopezdeancos/react-against-the-machine/total)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/javierlopezdeancos/react-against-the-machine/publish-react-against-the-machine-in-npm-on-release)
+![Codecov coverage](https://img.shields.io/codecov/c/github/javierlopezdeancos/react-against-the-machine)
 ![npm](https://img.shields.io/npm/v/erre-ele)
 
 ## Summary
