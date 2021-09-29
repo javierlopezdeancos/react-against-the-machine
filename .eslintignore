@@ -1,2 +1,2 @@
-dist/*
 jest.setup.ts
+lib

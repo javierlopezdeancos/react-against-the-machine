@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>11/11</span>
+                <span class='fraction'>0/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">62.5% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>5/8</span>
+                <span class='fraction'>0/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>11/11</span>
+                <span class='fraction'>0/16</span>
             </div>
         
             
@@ -55,7 +55,7 @@
             Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
         </p>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -102,78 +102,78 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { IBus, BusHandler } from './index';
 &nbsp;
 type Subscriptions = {
   [key: string]: BusHandler[];
 };
 &nbsp;
-class BusMock implements IBus {
+<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >class BusMock implements IBus {</span></span>
   subscriptions: Subscriptions;
 &nbsp;
-  constructor() {
-    this.subscriptions = {} as Subscriptions;
+<span class="fstat-no" title="function not covered" >  constructor() {</span>
+<span class="cstat-no" title="statement not covered" >    this.subscriptions = {} as Subscriptions;</span>
   }
 &nbsp;
-  public publish(message: string, data?: Object): void {
-    const handlers = this.subscriptions[message];
+<span class="fstat-no" title="function not covered" >  public <span class="cstat-no" title="statement not covered" >p</span>ublish(message: string, data?: Object): void {</span>
+    const handlers = <span class="cstat-no" title="statement not covered" >this.subscriptions[message];</span>
 &nbsp;
-    <span class="missing-if-branch" title="else path not taken" >E</span>if (handlers) {
-      handlers.forEach((h: BusHandler): void =&gt; {
-        h(message, data);
+<span class="cstat-no" title="statement not covered" >    if (handlers) {</span>
+<span class="cstat-no" title="statement not covered" >      handlers.forEach(<span class="fstat-no" title="function not covered" >(h</span>: BusHandler): void =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        h(message, data);</span>
       });
     }
   }
 &nbsp;
-  public subscribe(message: string, trigger: BusHandler) {
-    <span class="missing-if-branch" title="else path not taken" >E</span>if (this<span class="branch-0 cbranch-no" title="branch not covered" >?.s</span>ubscriptions[message] === undefined) {
-      this.subscriptions[message] = [];
+<span class="fstat-no" title="function not covered" >  public <span class="cstat-no" title="statement not covered" >s</span>ubscribe(message: string, trigger: BusHandler) {</span>
+<span class="cstat-no" title="statement not covered" >    if (this?.subscriptions[message] === undefined) {</span>
+<span class="cstat-no" title="statement not covered" >      this.subscriptions[message] = [];</span>
     }
 &nbsp;
-    this.subscriptions[message].push(trigger);
+<span class="cstat-no" title="statement not covered" >    this.subscriptions[message].push(trigger);</span>
   }
 &nbsp;
-  public clear() {
-    this.subscriptions = {} as Subscriptions;
+<span class="fstat-no" title="function not covered" >  public <span class="cstat-no" title="statement not covered" >c</span>lear() {</span>
+<span class="cstat-no" title="statement not covered" >    this.subscriptions = {} as Subscriptions;</span>
   }
-}
+<span class="cstat-no" title="statement not covered" >}</span>
 &nbsp;
-export default BusMock;
+<span class="cstat-no" title="statement not covered" >export default BusMock;</span>
 &nbsp;
-export const busMock = new BusMock();
+export const <span class="cstat-no" title="statement not covered" >busMock = new BusMock();</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -181,7 +181,7 @@ export const busMock = new BusMock();
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Sun Sep 26 2021 18:48:22 GMT+0200 (hora de verano de Europa central)
+                at Wed Sep 29 2021 21:11:04 GMT+0200 (hora de verano de Europa central)
             </div>
         </div>
         <script src="prettify.js"></script>
