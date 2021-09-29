@@ -4,15 +4,17 @@ orbs:
   coveralls: coveralls/coveralls@1.0.6
 
 jobs:
-  analyze-coverage:
+  coverage-job:
     docker:
+      # replace with your preferred image
       - image: cimg/base:stable
     steps:
       - coveralls/upload:
-          path_to_lcov: ./coverage/lcov.info 
-          flag_name: analyle coverage 
+          path_to_lcov: ./coverage/lcov.info
+          flag_name: reacg-against-the-machine
+          parallel: true
 
 workflows:
-  coverage:
+  coverage-workflow:
     jobs:
-      - analyze-coverage
+      - coverage-job
