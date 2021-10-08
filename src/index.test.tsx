@@ -100,4 +100,36 @@ describe('Given a State <Machine/>', () => {
 
     expect(onTransitionToComponentBMock.mock.calls.length).toBe(1);
   });
+
+  it('When the user is logged and', () => {
+    const documentBody = renderMachine({
+      logged: true,
+      bus: busMock,
+      componentAIsPrivate: true,
+      componentBIsPrivate: true,
+      onTransitionToComponentBMock,
+    });
+
+    const componentANode = documentBody.queryByTestId(componentAId);
+    const componentBNode = documentBody.queryByTestId(componentBId);
+
+    expect(componentANode).not.toBeInTheDocument();
+    expect(componentBNode).toBeInTheDocument();
+  });
+
+  it('Test', () => {
+    const documentBody = renderMachine({
+      logged: false,
+      bus: busMock,
+      componentAIsPrivate: false,
+      componentBIsPrivate: true,
+      onTransitionToComponentBMock,
+    });
+
+    const componentANode = documentBody.queryByTestId(componentAId);
+    const componentBNode = documentBody.queryByTestId(componentBId);
+
+    expect(componentANode).toBeInTheDocument();
+    expect(componentBNode).not.toBeInTheDocument();
+  });
 });
