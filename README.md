@@ -271,19 +271,19 @@ const App = () => {
   };
 
   return (
-    <Machine initial="componentA" bus={bus}>
+    <Machine initial="componentA" bus={bus} logger={true}>
       <State id="componentA" private={false}>
         <Content>
           <ComponentA />
         </Content>
-        <Transition event="go::componentB" state="componentB" onEnter={onTransitionToComponentB} />
+        <Transition event="go::B" state="componentB" onEnter={onTransitionToComponentB} />
       </State>
 
       <State id="componentB" private={false}>
         <Content>
           <ComponentB />
         </Content>
-        <Transition event="go::componentA" state="componentA" />
+        <Transition event="go::A" state="componentA" />
       </State>
     </Machine>
   );
