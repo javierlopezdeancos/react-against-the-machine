@@ -1,6 +1,6 @@
-![logo](assets/logo.png)
+![logo](assets/logo_small.jpg)
 
-An state machine to react.
+An declarative state machine to react.
 
 ## Activity
 
