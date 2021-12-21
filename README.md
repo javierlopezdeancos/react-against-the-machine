@@ -1,4 +1,5 @@
-![logo](assets/logo_small.jpg)
+![[React against the machine]](assets/logo_small.jpg#gh-light-mode-only)
+![[React against the machine]](assets/logo_small_black.jpg#gh-dark-mode-only)
 
 An declarative state machine to react.
 
@@ -24,6 +25,7 @@ An declarative state machine to react.
   - [Lint](#lint)
   - [Lint fix](#lint-fix)
   - [Format](#format)
+- [Flow Diagram](#flow-diagram)
 - [Pieces](#pieces)
   - [Components hierarchy](#components-hierarchy)
   - [Machine](#machine)
@@ -36,6 +38,7 @@ An declarative state machine to react.
   - [Context](#context)
 - [Usage](#usage)
   - [Basic example](#basic-example)
+  - [Real example](#real-example)
 
 ## Installation
 
@@ -127,6 +130,68 @@ Format your code syntax with:
 
 ```shell
 npm run format
+```
+
+## Flow diagram
+
+```text
+┌────────────┐
+│            │
+│ URL CHANGE │
+│            │
+└─────┬──────┘
+      │
+      │
+┌─────▼──────┐      ┌────────────────┐
+│     IS     │ NO   │  IS NEXT       │ YES
+│    FIRST   ├─────►│ STATE EQUAL    ├───┐
+│    LOAD ?  │      │ TO PREV STATE? │   │
+└─────┬──────┘      └───────┬────────┘   │
+      │YES                  │ NO         │
+      │               ┌─────▼──────┐     │
+      │               │   SET      │     │
+┌─────▼──────┐        │ NEXT STATE │     │
+│   THERE    │        └─────┬──────┘     │
+│   ARE      │              │            │
+│COMPONENTS ?│        ┌─────▼──────┐     │
+└─────┬──────┘        │SET CONTENT │     │
+      │ YES           │TO NEXT     │     │
+      │               │STATE       │     │
+┌─────▼──────┐        └─────┬──────┘     │
+│   CLEAR    │              │            │
+│    BUS     │              │            │
+└─────┬──────┘              │            │
+      │                     │            │
+┌─────▼──────┐              │            │
+│   STORE    │              │            │
+│COMPONENTS  │              │            │
+└─────┬──────┘              │            │
+      │                     │            │
+┌─────▼─────┐               │            │
+│ SET INITAL│               │            │
+│ STATE AS  │               │            │
+│NEXT STATE │               │            │
+└─────┬─────┘               │            │
+      │                     │            │
+      │                     │            │
+┌─────▼─────┐               │            │
+│SET CONTENT│               │            │
+│TO INITIAL │               │            │
+│  STATE    │               │            │
+└─────┬─────┘               │            │
+      │                     │            │
+┌─────▼─────┐               │            │
+│ SUBSCRIBE │               │            │
+│ TO HISTORY│               │            │
+│   EVENTS  │               │            │
+└─────┬─────┘               │            │
+      │                     │            │
+┌─────▼─────────────────────▼────────────▼──┐
+│                                           │
+│               RENDER                      │
+│                                           │
+└───────────────────────────────────────────┘
+
 ```
 
 ## Pieces
@@ -290,4 +355,16 @@ const App = () => {
 };
 
 export default App;
+```
+
+### Real example
+
+![[example]](assets/example.gif)
+
+You could build and run the real example that we have [here](src/example-ratm/src/App.tsx):
+
+```shell
+cd src/example-ratm
+npm i
+npm start
 ```
