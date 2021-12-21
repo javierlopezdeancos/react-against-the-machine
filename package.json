@@ -61,7 +61,7 @@
   },
   "homepage": "https://github.com/javierlopezdeancos/react-against-the-machine#readme",
   "dependencies": {
-    "erre-ele": "^0.2.0"
+    "erre-ele": "^0.2.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.14.1",
