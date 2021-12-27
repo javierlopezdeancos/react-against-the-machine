@@ -1,6 +1,7 @@
-![logo](assets/logo.png)
+![[React against the machine]](assets/logo_small.jpg#gh-light-mode-only)
+![[React against the machine]](assets/logo_small_black.jpg#gh-dark-mode-only)
 
-An state machine to react.
+An declarative state machine to react.
 
 ## Activity
 
@@ -24,18 +25,19 @@ An state machine to react.
   - [Lint](#lint)
   - [Lint fix](#lint-fix)
   - [Format](#format)
-- [Pieces](#pieces)
+- [Components](#components)
   - [Components hierarchy](#components-hierarchy)
   - [Machine](#machine)
     - [Machine props](#machine-props)
       - [IBus interface](#ibus-interface)
   - [State](#state)
     - [State props](#state-props)
-  - [Transmition](#transmition)
-    - [Transmition props](#transmition-props)
+  - [Transition](#transition)
+    - [Transition props](#transition-props)
   - [Context](#context)
 - [Usage](#usage)
   - [Basic example](#basic-example)
+  - [Real example](#real-example)
 
 ## Installation
 
@@ -129,7 +131,21 @@ Format your code syntax with:
 npm run format
 ```
 
-## Pieces
+## Provider
+
+The State machine has a `<MachineProvider>` context API that storage all components to the Machine State and handle the state management.
+
+### useMachine
+
+The `useMachine` hook is used to access the state machine in Machine context API.
+
+```tsx
+import { useMachine } from 'react-against-the-machine';
+
+const machine = useMachine();
+```
+
+## Components
 
 We have some pieces as react components to represent the states and transitions of the state machine.
 
@@ -141,14 +157,16 @@ We have some pieces as react components to represent the states and transitions 
 ### Components hierarchy
 
 ```
-<Machine>
-  <State>
-    <Content>
-      <ComponentExample />
-    </Content>
-    <Transition />
-  </State>
-</Machine>
+<MachineProvider>
+  <Machine>
+    <State>
+      <Content>
+        <ComponentExample />
+      </Content>
+      <Transition />
+    </State>
+  </Machine>
+</MachineProvider>
 ```
 
 ### Machine
@@ -156,30 +174,33 @@ We have some pieces as react components to represent the states and transitions 
 A react component that represents the state machine wrapper.
 
 ```tsx
-import Machine from 'react-against-the-machine';
+import Machine, { MachineProvider } from 'react-against-the-machine';
 import { laGuaGua as bus } from 'laguagua';
 
-<Machine initial="componentA" bus={bus}>
-  <!-- here should be the state machine States -->
-</Machine>
+<MachineProvider>
+  <Machine initial="componentA" bus={bus} logged={false}>
+    <!-- here should be the state machine States -->
+  </Machine>
+</MachineProvider>
 ```
 
 #### Machine props
 
 Machine needs some props:
 
-- initial `string` - the initial state id of the machine.
-- bus `object` - the bus object of the state machine to publish/subscribe events that implement the IBus interface.
+- **initial** `string` - the initial state id of the machine.
+- **bus** `object` - the bus object of the state machine to publish/subscribe events that implement the IMachineBus interface.
+- **logged** `boolean` - the user logged status. This will be used to transition or not to some states depending on their private/public status.
 
 We are using to our example the bus [Laguagua](https://github.com/javierlopezdeancos/laguagua), but you can use any
 other bus event that implements the IBus interface.
 
-##### IBus interface
+##### IMachineBus interface
 
 ```tsx
-export type BusHandler = (message: string, data?: Object) => void;
+export type MachineBusHandler = (message: string, data?: Object) => void;
 
-export interface IBus {
+export interface IMachineBus {
   publish: (message: string, data?: Object) => void;
   subscribe: (message: string, trigger: BusHandler) => void;
   clear: () => void;
@@ -206,8 +227,8 @@ import { State } from 'react-against-the-machine';
 
 State needs some props:
 
-- id `string` - the state id to this state.
-- private `boolean` _(default true)_ - if is private, the state only render the content if user is logged.
+- **id** `string` - the state id to this state.
+- **private** `boolean` _(default true)_ - if is private, the state only render the content if user is logged.
 
 ### Transition
 
@@ -225,8 +246,8 @@ import { Transition } from 'react-against-the-machine';
 
 Transition needs some props:
 
-- event `string` - the event to trigger this transition.
-- state `string` - the state id to go to.
+- **event** `string` - the event to trigger this transition.
+- **state** `string` - the state id to go to.
 
 ### Content
 
@@ -237,20 +258,20 @@ A react component that render a react component that be wrapper by when machine 
 ### Basic example
 
 ```
-           ┌─────────────────────┐                 ┌───────────────────┐
-           │                     │                 │                   │
-           │                     │ go::componentB  │                   │
-  ┌───────►│     StateA          ├────────────────►│      StateB       ├────────┐
-  │        │                     │                 │                   │        │
-  │        │                     │                 │                   │        │
-  │        └─────────────────────┘                 └───────────────────┘        │
-  │                                                                             │
-  │                                                                             │
-  │                                                                             │
-  │                                                                             │
-  │                                                                             │
-  └─────────────────────────────────────────────────────────────────────────────┘
-                                 go::componentA
+           ┌─────────────────────┐                   ┌───────────────────┐
+           │                     │                   │                   │
+           │                     │ go:to:componentB  │                   │
+  ┌───────►│     StateA          ├──────────────────►│      StateB       ├────────┐
+  │        │                     │                   │                   │        │
+  │        │                     │                   │                   │        │
+  │        └─────────────────────┘                   └───────────────────┘        │
+  │                                                                               │
+  │                                                                               │
+  │                                                                               │
+  │                                                                               │
+  │                                                                               │
+  └───────────────────────────────────────────────────────────────────────────────┘
+                                 go:to:componentA
 
 ```
 
@@ -258,7 +279,7 @@ A react component that render a react component that be wrapper by when machine 
 import React from 'react';
 
 // import the react against the machine pieces
-import Machine, { State, Transition, Content } from 'react-against-the-machine';
+import Machine, { MachineProvider, State, Transition, Content } from 'react-against-the-machine';
 // import any bus that implements the IBus interface
 import { laGuaGua as bus } from 'laguagua';
 
@@ -271,23 +292,37 @@ const App = () => {
   };
 
   return (
-    <Machine initial="componentA" bus={bus}>
-      <State id="componentA" private={false}>
-        <Content>
-          <ComponentA />
-        </Content>
-        <Transition event="go::componentB" state="componentB" onEnter={onTransitionToComponentB} />
-      </State>
+    <MachineProvider>
+      <Machine initial="componentA" bus={bus} logger={true}>
+        <State id="componentA" private={false}>
+          <Content>
+            <ComponentA />
+          </Content>
+          <Transition event="go:to:componentB" state="componentB" onEnter={onTransitionToComponentB} />
+        </State>
 
-      <State id="componentB" private={false}>
-        <Content>
-          <ComponentB />
-        </Content>
-        <Transition event="go::componentA" state="componentA" />
-      </State>
-    </Machine>
+        <State id="componentB" private={false}>
+          <Content>
+            <ComponentB />
+          </Content>
+          <Transition event="go:to:componentA" state="componentA" />
+        </State>
+      </Machine>
+    </MachineProvider>
   );
 };
 
 export default App;
+```
+
+### Real example
+
+![[example]](assets/example.gif)
+
+You could build and run the real example that we have [here](src/example-ratm/src/App.tsx):
+
+```shell
+cd src/example-ratm
+npm i
+npm start
 ```

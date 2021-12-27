@@ -1,0 +1,92 @@
+#root {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.state-one {
+  width: 100%;
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.state-one h1 {
+  color: #3d3d3d;
+}
+
+.state-one button {
+  border: 2px solid #3d3d3d;
+  color: #3d3d3d;
+  background: transparent;
+  padding: 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.state-one button:first-child {
+  margin-right: 20px;
+}
+
+.state-two {
+  width: 100%;
+  height: 100vh;
+  background: #525252;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.state-two h1 {
+  color: #ededed;
+}
+
+.state-two button {
+  border: 2px solid #ededed;
+  color: #ededed;
+  background: transparent;
+  padding: 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.state-two button:first-child {
+  margin-right: 20px;
+}
+
+.state-three {
+  width: 100%;
+  height: 100vh;
+  background: #2e2e2e;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.state-three h1 {
+  color: #cccccc;
+}
+
+.state-three button {
+  border: 2px solid #cccccc;
+  color: #cccccc;
+  background: transparent;
+  padding: 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.state-three button:first-child {
+  margin-right: 20px;
+}

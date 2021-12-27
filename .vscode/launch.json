@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch RATM in Chrome",
+      "request": "launch",
+      "type": "pwa-chrome",
+      "url": "http://localhost:3000",
+      "port": 3000,
+      "webRoot": "${workspaceFolder}/src/example-ratm/src"
+    },
+    {
+      "name": "Attach RATM to Chrome",
+      "type": "chrome",
+      "request": "attach",
+      "urlFilter": "http://localhost:3000/*",
+      "port": 3000,
+      "webRoot": "${workspaceFolder}/src/example-ratm/src"
+    }
+  ]
+}

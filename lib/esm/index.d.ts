@@ -1,14 +1,14 @@
 /// <reference types="react" />
-import { OnEnterDataResponse } from './mechanism';
-export declare type BusHandler = (message: string, data?: Object) => void;
-export interface IBus {
+import { OnEnterDataResponse } from './context';
+export declare type StateMachineBusHandler = (message: string, data?: Object) => void;
+export interface IStateMachineBus {
     publish: (message: string, data?: Object) => void;
-    subscribe: (message: string, trigger: BusHandler) => void;
+    subscribe: (message: string, trigger: StateMachineBusHandler) => void;
     clear: () => void;
 }
 interface IStateMachineProps {
     initial: string;
-    bus: IBus;
+    bus: IStateMachineBus;
     logged: boolean;
     children: JSX.Element[];
 }
@@ -31,5 +31,5 @@ interface ContentProps {
     children: JSX.Element;
 }
 export declare function Content({ children }: ContentProps): JSX.Element;
-export { mechanism } from './mechanism';
-export { default as Mechanism } from './mechanism';
+export { MachineProvider, MachineContext } from './context';
+export { default as useMachine } from './context';
