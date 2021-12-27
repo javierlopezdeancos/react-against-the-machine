@@ -2,4 +2,4 @@ jest.setup.ts
 lib
 src/bus.mock.ts
 src/components.mock.tsx
-src/example-ratm/vite.config.ts
+src/example-ratm
