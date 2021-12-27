@@ -1,119 +1,189 @@
 import * as React from 'react';
 import { act } from 'react-dom/test-utils';
-import { render, RenderResult } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { busMock } from './bus.mock';
-import Machine, { State, Transition, Content, IBus } from './';
-import { ComponentA, ComponentB } from './components.mock';
+import Machine, { State, Transition, Content } from './';
+import Component from './components.mock';
+import { MachineProvider } from './context';
 
-const componentAId = 'componentA';
-const componentBId = 'componentB';
+const contentComponentAId = 'componentA';
+const contentComponentBId = 'componentB';
 
-const onTransitionToComponentBMock = jest.fn((): boolean => true);
+const onTransitionToBStateMock = jest.fn().mockName('onTransitionToBStateMockedFunction');
 
-interface IRenderMachine {
-  logged: boolean;
-  bus: IBus;
-  componentAIsPrivate: boolean;
-  componentBIsPrivate: boolean;
-  onTransitionToComponentBMock: jest.Mock<boolean, []>;
-}
+beforeEach(() => {
+  act(() => {
+    busMock.publish(`go:to:${contentComponentAId}`);
+  });
+});
 
-const renderMachine = (props: IRenderMachine): RenderResult =>
-  render(
+test('Given a State <Machine/> When run to the first time Then should be render only the initial state if is not private', () => {
+  const { queryByTestId } = render(
     <div data-testid="app">
-      <Machine initial={componentAId} bus={props.bus} logged={props.logged}>
-        <State id={componentAId} private={props.componentAIsPrivate}>
-          <Content>
-            <ComponentA id={componentAId} />
-          </Content>
-          <Transition
-            event={`go:to:${componentBId}`}
-            state={componentBId}
-            onEnter={props.onTransitionToComponentBMock}
-          />
-        </State>
+      <MachineProvider>
+        <Machine initial={contentComponentAId} bus={busMock} logged={false}>
+          <State id={contentComponentAId} private={false}>
+            <Content>
+              <Component id={contentComponentAId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentBId}`} state={contentComponentBId} />
+          </State>
 
-        <State id={componentBId} private={props.componentBIsPrivate}>
-          <Content>
-            <ComponentB id={componentBId} />
-          </Content>
-          <Transition event={`go:to:${componentAId}`} state={componentAId} />
-        </State>
-      </Machine>
+          <State id={contentComponentBId} private={false}>
+            <Content>
+              <Component id={contentComponentBId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentAId}`} state={contentComponentAId} />
+          </State>
+        </Machine>
+      </MachineProvider>
     </div>
   );
 
-describe('Given a State <Machine/>', () => {
-  afterEach(() => {
-    onTransitionToComponentBMock.mockClear();
+  const initialStateContentComponent = queryByTestId(contentComponentAId);
+  const stateBContentComponent = queryByTestId(contentComponentBId);
+
+  expect(initialStateContentComponent).toBeInTheDocument();
+  expect(stateBContentComponent).not.toBeInTheDocument();
+});
+
+test('Given a State <Machine/> When a transition event is trigger Then should be render only the final target state to this transition', () => {
+  const { queryByTestId } = render(
+    <div data-testid="app">
+      <MachineProvider>
+        <Machine initial={contentComponentAId} bus={busMock} logged={false}>
+          <State id={contentComponentAId} private={false}>
+            <Content>
+              <Component id={contentComponentAId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentBId}`} state={contentComponentBId} />
+          </State>
+
+          <State id={contentComponentBId} private={false}>
+            <Content>
+              <Component id={contentComponentBId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentAId}`} state={contentComponentAId} />
+          </State>
+        </Machine>
+      </MachineProvider>
+    </div>
+  );
+
+  act(() => {
+    busMock.publish(`go:to:${contentComponentBId}`);
   });
 
-  it('When run to the first time then should be render only the initial state if is not private', () => {
-    const documentBody = renderMachine({
-      logged: true,
-      bus: busMock,
-      componentAIsPrivate: false,
-      componentBIsPrivate: false,
-      onTransitionToComponentBMock,
-    });
+  const stateAContentComponent = queryByTestId(contentComponentAId);
+  const stateBContentComponent = queryByTestId(contentComponentBId);
 
-    const componentANode = documentBody.queryByTestId(componentAId);
-    const componentBNode = documentBody.queryByTestId(componentBId);
+  expect(stateAContentComponent).not.toBeInTheDocument();
+  expect(stateBContentComponent).toBeInTheDocument();
+});
 
-    expect(componentANode).toBeInTheDocument();
-    expect(componentBNode).not.toBeInTheDocument();
+test('Given a State <Machine/> When a transition event is trigger and transition has a handler to be executed on enter Then should be executed', () => {
+  render(
+    <div data-testid="app">
+      <MachineProvider>
+        <Machine initial={contentComponentAId} bus={busMock} logged={false}>
+          <State id={contentComponentAId} private={false}>
+            <Content>
+              <Component id={contentComponentAId} />
+            </Content>
+            <Transition
+              event={`go:to:${contentComponentBId}`}
+              state={contentComponentBId}
+              onEnter={onTransitionToBStateMock}
+            />
+          </State>
+
+          <State id={contentComponentBId} private={false}>
+            <Content>
+              <Component id={contentComponentBId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentAId}`} state={contentComponentAId} />
+          </State>
+        </Machine>
+      </MachineProvider>
+    </div>
+  );
+
+  act(() => {
+    busMock.publish(`go:to:${contentComponentBId}`);
   });
 
-  it('When a transition event is trigger then should be render only the final target state to this transition', () => {
-    const documentBody = renderMachine({
-      logged: true,
-      bus: busMock,
-      componentAIsPrivate: false,
-      componentBIsPrivate: false,
-      onTransitionToComponentBMock,
-    });
+  expect(onTransitionToBStateMock.mock.calls.length).toBe(1);
+});
 
-    act(() => {
-      busMock.publish(`go:to:${componentBId}`);
-    });
+test('Given a State <Machine/> When user is no logged And an event is trigger to transition to a private state Then the machine state should transition to initial state', () => {
+  const { queryByTestId } = render(
+    <div data-testid="app">
+      <MachineProvider>
+        <Machine initial={contentComponentAId} bus={busMock} logged={false}>
+          <State id={contentComponentAId} private={false}>
+            <Content>
+              <Component id={contentComponentAId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentBId}`} state={contentComponentBId} />
+          </State>
 
-    const componentANode = documentBody.queryByTestId(componentAId);
-    const componentBNode = documentBody.queryByTestId(componentBId);
+          <State id={contentComponentBId} private>
+            <Content>
+              <Component id={contentComponentBId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentAId}`} state={contentComponentAId} />
+          </State>
+        </Machine>
+      </MachineProvider>
+    </div>
+  );
 
-    expect(componentANode).not.toBeInTheDocument();
-    expect(componentBNode).toBeInTheDocument();
+  act(() => {
+    busMock.publish(`go:to:${contentComponentBId}`);
   });
 
-  it('When a transition event is trigger and transition has a handler to be executed on enter then should be executed', () => {
-    renderMachine({
-      logged: true,
-      bus: busMock,
-      componentAIsPrivate: false,
-      componentBIsPrivate: false,
-      onTransitionToComponentBMock,
-    });
+  const initialStateContentComponent = queryByTestId(contentComponentAId);
+  const stateBContentComponent = queryByTestId(contentComponentBId);
 
-    act(() => {
-      busMock.publish(`go:to:${componentBId}`);
-    });
+  expect(initialStateContentComponent).toBeInTheDocument();
+  expect(stateBContentComponent).not.toBeInTheDocument();
+});
 
-    expect(onTransitionToComponentBMock.mock.calls.length).toBe(1);
+test('Given a State <Machine/> When user is logged And an event is trigger to transition to a private state Then the machine state should transition to initial state', () => {
+  const { queryByTestId } = render(
+    <div data-testid="app">
+      <MachineProvider>
+        <Machine initial={contentComponentAId} bus={busMock} logged>
+          <State id={contentComponentAId} private={false}>
+            <Content>
+              <Component id={contentComponentAId} />
+            </Content>
+            <Transition
+              event={`go:to:${contentComponentBId}`}
+              state={contentComponentBId}
+              onEnter={onTransitionToBStateMock}
+            />
+          </State>
+
+          <State id={contentComponentBId} private>
+            <Content>
+              <Component id={contentComponentBId} />
+            </Content>
+            <Transition event={`go:to:${contentComponentAId}`} state={contentComponentAId} />
+          </State>
+        </Machine>
+      </MachineProvider>
+    </div>
+  );
+
+  act(() => {
+    busMock.publish(`go:to:${contentComponentBId}`);
   });
 
-  it('When the user is logged and', () => {
-    const documentBody = renderMachine({
-      logged: true,
-      bus: busMock,
-      componentAIsPrivate: true,
-      componentBIsPrivate: true,
-      onTransitionToComponentBMock,
-    });
+  const initialStateContentComponent = queryByTestId(contentComponentAId);
+  const stateBContentComponent = queryByTestId(contentComponentBId);
 
-    const componentANode = documentBody.queryByTestId(componentAId);
-    const componentBNode = documentBody.queryByTestId(componentBId);
-
-    expect(componentANode).not.toBeInTheDocument();
-    expect(componentBNode).toBeInTheDocument();
-  });
+  expect(initialStateContentComponent).not.toBeInTheDocument();
+  expect(stateBContentComponent).toBeInTheDocument();
 });

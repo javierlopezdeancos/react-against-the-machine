@@ -1,10 +1,10 @@
-import { IBus, BusHandler } from './index';
+import { IStateMachineBus, StateMachineBusHandler } from './index';
 
 type Subscriptions = {
-  [key: string]: BusHandler[];
+  [key: string]: StateMachineBusHandler[];
 };
 
-class BusMock implements IBus {
+class BusMock implements IStateMachineBus {
   subscriptions: Subscriptions;
 
   constructor() {
@@ -15,13 +15,13 @@ class BusMock implements IBus {
     const handlers = this.subscriptions[message];
 
     if (handlers) {
-      handlers.forEach((h: BusHandler): void => {
+      handlers.forEach((h: StateMachineBusHandler): void => {
         h(message, data);
       });
     }
   }
 
-  public subscribe(message: string, trigger: BusHandler) {
+  public subscribe(message: string, trigger: StateMachineBusHandler) {
     if (this?.subscriptions[message] === undefined) {
       this.subscriptions[message] = [];
     }

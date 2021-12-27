@@ -1,26 +1,32 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef } from 'react';
 
 import rl from 'erre-ele';
-import { mechanism, State as MechanismState, ToState as MechanismToState, OnEnterDataResponse } from './mechanism';
+import useMachine, { State as MachineState, Transition as MachineTransition, OnEnterDataResponse } from './context';
 
-export type BusHandler = (message: string, data?: Object) => void;
+export type StateMachineBusHandler = (message: string, data?: Object) => void;
 
-export interface IBus {
+export interface IStateMachineBus {
   publish: (message: string, data?: Object) => void;
-  subscribe: (message: string, trigger: BusHandler) => void;
+  subscribe: (message: string, trigger: StateMachineBusHandler) => void;
   clear: () => void;
 }
 
 interface IStateMachineProps {
   initial: string;
-  bus: IBus;
+  bus: IStateMachineBus;
   logged: boolean;
   children: JSX.Element[];
 }
 
 export default function Machine(props: IStateMachineProps): JSX.Element {
   const { initial, bus, children, logged } = props;
-  const [content, setContent] = useState<JSX.Element>();
+
+  const mounted = useRef(false);
+  const machine = useMachine();
+
+  const isPathNameHostRoot = useCallback(() => rl.pathname === '' || rl.pathname === '/', [rl.pathname]);
+
+  const isPathNameInitialState = useCallback(() => rl.pathname === '/' + initial, [rl.pathname, initial]);
 
   const getStateIdFromURL = useCallback((): string => {
     const pathname = rl.getPathnameFromURL();
@@ -28,41 +34,52 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
     return pathsSegments[1];
   }, []);
 
-  const setCurrentPath = useCallback(() => {
-    const stateId = getStateIdFromURL();
+  const setCurrentStateFromURL = useCallback(() => {
+    const pathNameIsHostRoot = isPathNameHostRoot();
+    const pathNameIsInitialState = isPathNameInitialState();
+    const nextStateId = getStateIdFromURL() === '' ? initial : getStateIdFromURL();
+    const currentStateId = machine.currentId;
 
-    if (stateId) {
-      rl.pathname = '/' + stateId;
+    if (currentStateId === nextStateId && nextStateId !== undefined) {
+      return;
+    } else if (pathNameIsHostRoot || pathNameIsInitialState) {
+      if (mounted.current === null) {
+        return;
+      }
+
+      machine.setCurrentId(initial);
     } else {
-      rl.pathname = '/';
+      if (mounted.current === null) {
+        return;
+      }
+
+      machine.setCurrentId(nextStateId);
+
+      const nextState = machine.getState(nextStateId);
+
+      if (nextState?.onEnter) {
+        const params = getCurrentStateParamsFromURL();
+        nextState?.onEnter(params);
+      }
     }
-  }, [getStateIdFromURL]);
-
-  const onHistoryChange = useCallback(() => {
-    setCurrentPath();
-  }, [setCurrentPath]);
-
-  rl.setOnPopState(onHistoryChange);
-
-  const setCurrentState = useCallback(() => {
-    const initialState = mechanism.getState(initial);
-
-    if (rl.pathname === '/' || rl.pathname === '/' + initialState?.id) {
-      mechanism.currentId = initialState?.id;
-    } else {
-      const stateId = getStateIdFromURL();
-      mechanism.currentId = stateId;
-    }
-  }, [initial, mechanism, getStateIdFromURL]);
+  }, [
+    initial,
+    machine.currentId,
+    machine.setCurrentId,
+    machine.getState,
+    getStateIdFromURL,
+    isPathNameHostRoot,
+    isPathNameInitialState,
+  ]);
 
   const getCurrentStateParamsFromURL = useCallback((): Map<string, string> | undefined => {
-    const stateId = mechanism.currentId;
+    const stateId = machine.currentId;
 
     if (!stateId) {
       return;
     }
 
-    const state = mechanism.getState(stateId);
+    const state = machine.getState(stateId);
     const params = new Map();
 
     if (!state?.params) {
@@ -82,41 +99,110 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
     }
 
     return params;
-  }, [mechanism]);
+  }, [machine.currentId, machine.getState, rl.getParamFromURL]);
 
-  const setConfigurationToCurrentState = useCallback(() => {
-    setCurrentPath();
-    setCurrentState();
+  const storeStateAndTransition = useCallback(
+    (
+      stateId: string,
+      isPrivate: boolean,
+      params: string[],
+      onEnter: (params?: Map<string, string>) => void,
+      event: string,
+      toStateId: string,
+      toOnEnter?: (data?: unknown) => void
+    ): MachineState | undefined => {
+      if (stateId && event && toStateId) {
+        machine.addState({
+          id: stateId,
+          isPrivate,
+          params,
+          onEnter,
+          to: [] as MachineTransition[],
+        });
 
-    const currentId = mechanism.currentId;
+        const t = {
+          id: toStateId,
+          event,
+          onEnter: toOnEnter,
+        } as MachineTransition;
 
-    if (!currentId) {
+        machine.setTransition(stateId, t);
+      }
+
       return;
-    }
+    },
+    [machine]
+  );
 
-    const currentState = mechanism.getState(currentId);
+  const storeStateAndContent = useCallback(
+    (
+      stateId: string,
+      isPrivate: boolean,
+      params: string[],
+      onEnter: (params?: Map<string, string>) => void,
+      content: JSX.Element
+    ) => {
+      if (stateId) {
+        machine.addState({
+          id: stateId,
+          isPrivate,
+          params,
+          onEnter,
+          to: [] as MachineTransition[],
+        });
 
-    if (currentState?.content) {
-      setContent(currentState.content);
-    }
+        machine.setContent(stateId, content);
+      }
+    },
+    [machine]
+  );
 
-    if (currentState?.onEnter) {
-      const params = getCurrentStateParamsFromURL();
-      currentState?.onEnter(params);
-    }
-  }, [setCurrentPath, setCurrentState, getCurrentStateParamsFromURL, mechanism]);
+  const clearBus = useCallback(() => {
+    bus.clear();
+  }, [bus]);
+
+  const runMachineOnPopBrowserHistory = useCallback(
+    (browserHistoryPopEvent?) => {
+      const isABrowserHistoryEventWithAValidPathname =
+        browserHistoryPopEvent && browserHistoryPopEvent?.currentTarget?.document?.location?.pathname;
+
+      if (isABrowserHistoryEventWithAValidPathname) {
+        rl.pathname = browserHistoryPopEvent?.currentTarget.document?.location?.pathname;
+        setCurrentStateFromURL();
+        return;
+      }
+    },
+    [setCurrentStateFromURL]
+  );
+
+  const subscribeToBrowserHistoryEvents = useCallback(() => {
+    rl.setOnPopState(runMachineOnPopBrowserHistory);
+  }, [rl, runMachineOnPopBrowserHistory]);
+
+  const unSubscribeToBrowserHistoryEvents = useCallback(() => {
+    rl.unSubscribeOnPopState();
+  }, [rl]);
 
   const messageHandler = useCallback(
     (message: string, data?: unknown): void => {
-      const transition = mechanism.getTransitionByEvent(message);
-      const stateToTransitionTo = mechanism.getStateByEvent(message);
+      const transition = machine.getTransitionByEvent(message);
+      const stateToTransition = machine.getStateByEvent(message);
+      const currentStateId = getStateIdFromURL() === '' ? initial : getStateIdFromURL();
+      const stateToTransitionIsTheInitialState = stateToTransition?.id === initial;
 
-      if (stateToTransitionTo && transition) {
-        const isStateToTransitionPrivate = mechanism.isPrivate(stateToTransitionTo);
+      if (stateToTransition?.id === currentStateId) {
+        return;
+      }
+
+      if (stateToTransition && transition) {
+        const isStateToTransitionPrivate = machine.isPrivate(stateToTransition);
 
         if ((isStateToTransitionPrivate && logged) || !isStateToTransitionPrivate) {
-          rl.go('/' + stateToTransitionTo.id);
-          mechanism.currentId = stateToTransitionTo?.id;
+          if (stateToTransitionIsTheInitialState) {
+            rl.go('/');
+          } else {
+            rl.go('/' + stateToTransition.id);
+          }
 
           if (transition?.onEnter) {
             transition.onEnter(data);
@@ -126,127 +212,88 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
         }
       }
 
-      setConfigurationToCurrentState();
+      setCurrentStateFromURL();
     },
-    [mechanism, setConfigurationToCurrentState, logged]
+    [machine, rl, logged, initial]
   );
 
-  const addStateAndTransitionToMechanism = useCallback(
-    (
-      stateId: string,
-      isPrivate: boolean,
-      params: string[],
-      onEnter: (params?: Map<string, string>) => void,
-      event: string,
-      toStateId: string,
-      toOnEnter?: (data?: unknown) => void
-    ): MechanismState | undefined => {
-      if (stateId && event && toStateId) {
-        mechanism.setState({
-          id: stateId,
-          isPrivate,
-          params,
-          onEnter,
-          to: [] as MechanismToState[],
+  const storeStates = useCallback(() => {
+    const stateComponents = children;
+
+    stateComponents.map((stateComponent: JSX.Element): JSX.Element | void => {
+      const componentIsAStateComponent = stateComponent?.type?.name === 'State';
+
+      if (componentIsAStateComponent) {
+        stateComponent?.props?.children.forEach((stateComponentChild: JSX.Element): void | JSX.Element => {
+          const componentIsATransitionComponent = stateComponentChild?.type?.name === 'Transition';
+          const componentIsAContentComponent = stateComponentChild?.type?.name === 'Content';
+
+          if (componentIsATransitionComponent && !componentIsAContentComponent) {
+            const transitionComponent = stateComponentChild;
+
+            storeStateAndTransition(
+              stateComponent?.props?.id,
+              stateComponent?.props?.private,
+              stateComponent?.props?.params,
+              stateComponent?.props?.onEnter,
+              transitionComponent?.props?.event,
+              transitionComponent?.props?.state,
+              transitionComponent?.props?.onEnter
+            );
+
+            if (transitionComponent?.props?.event) {
+              bus.subscribe(transitionComponent?.props?.event, messageHandler as StateMachineBusHandler);
+            }
+          } else if (!componentIsATransitionComponent && componentIsAContentComponent) {
+            storeStateAndContent(
+              stateComponent?.props?.id,
+              stateComponent?.props?.private,
+              stateComponent?.props?.params,
+              stateComponent?.props?.onEnter,
+              stateComponentChild.props.children
+            );
+          }
         });
-
-        const t = {
-          id: toStateId,
-          event,
-          onEnter: toOnEnter,
-        } as MechanismToState;
-
-        mechanism.setTransition(stateId, t);
       }
+    });
+  }, [storeStateAndContent, storeStateAndTransition, bus, children, messageHandler]);
 
-      return;
-    },
-    [mechanism]
-  );
+  const startMachine = useCallback(() => {
+    clearBus();
 
-  const addStateAndContentToMechanism = useCallback(
-    (
-      stateId: string,
-      isPrivate: boolean,
-      params: string[],
-      onEnter: (params?: Map<string, string>) => void,
-      content: JSX.Element
-    ) => {
-      if (stateId) {
-        mechanism.setState({
-          id: stateId,
-          isPrivate,
-          params,
-          onEnter,
-          to: [] as MechanismToState[],
-        });
-
-        mechanism.setContent(stateId, content);
-      }
-    },
-    [mechanism]
-  );
-
-  const startUpMechanism = useCallback(() => {
     const stateComponents = children;
     const thereAreStatesComponents = stateComponents?.length > 0;
 
     if (thereAreStatesComponents) {
-      // eslint-disable-next-line
-      stateComponents.map((stateComponent: JSX.Element): JSX.Element | void => {
-        const componentIsAStateComponent = stateComponent?.type?.name === 'State';
-
-        if (componentIsAStateComponent) {
-          stateComponent?.props?.children.forEach((stateComponentChild: JSX.Element): void | JSX.Element => {
-            const componentIsATransitionComponent = stateComponentChild?.type?.name === 'Transition';
-            const componentIsAContentComponent = stateComponentChild?.type?.name === 'Content';
-
-            if (componentIsATransitionComponent && !componentIsAContentComponent) {
-              const transitionComponent = stateComponentChild;
-
-              addStateAndTransitionToMechanism(
-                stateComponent?.props?.id,
-                stateComponent?.props?.private,
-                stateComponent?.props?.params,
-                stateComponent?.props?.onEnter,
-                transitionComponent?.props?.event,
-                transitionComponent?.props?.state,
-                transitionComponent?.props?.onEnter
-              );
-
-              if (transitionComponent?.props?.event) {
-                bus.subscribe(transitionComponent?.props?.event, messageHandler as BusHandler);
-              }
-            } else if (!componentIsATransitionComponent && componentIsAContentComponent) {
-              addStateAndContentToMechanism(
-                stateComponent?.props?.id,
-                stateComponent?.props?.private,
-                stateComponent?.props?.params,
-                stateComponent?.props?.onEnter,
-                stateComponentChild.props.children
-              );
-            }
-          });
-        }
-      });
+      storeStates();
+      setCurrentStateFromURL();
+      subscribeToBrowserHistoryEvents();
     }
 
-    setConfigurationToCurrentState();
-  }, [
-    addStateAndContentToMechanism,
-    addStateAndTransitionToMechanism,
-    bus,
-    children,
-    messageHandler,
-    setConfigurationToCurrentState,
-  ]);
+    return;
+  }, [children, storeStates, setCurrentStateFromURL, subscribeToBrowserHistoryEvents]);
 
   useEffect(() => {
-    bus.clear();
-    startUpMechanism();
-  }, [startUpMechanism, bus]);
+    const prevCurrentId = machine.prevId;
+    const currentId = machine.currentId;
+    const stateToTransitionIsTheInitialLoad =
+      machine.currentContent === null && prevCurrentId === undefined && currentId === undefined;
 
-  return <>{content ? content : null}</>;
+    if (stateToTransitionIsTheInitialLoad || prevCurrentId !== currentId) {
+      if (stateToTransitionIsTheInitialLoad) {
+        startMachine();
+      }
+    }
+
+    return () => {
+      unSubscribeToBrowserHistoryEvents();
+    };
+  }, [machine.prevId, machine.currentId, machine.currentContent, unSubscribeToBrowserHistoryEvents, startMachine]);
+
+  const content = useMemo(() => machine.currentContent, [machine.currentContent]);
+
+  // @ts-expect-error
+  return <div ref={mounted}>{content}</div>;
 }
 
 interface IStateProps {
@@ -267,7 +314,7 @@ interface ITransitionProps<E> {
   onEnter?: OnEnterDataResponse<E>;
 }
 
-// @ts-expect-error: Let's ignore a compile error
+// @ts-expect-error
 export function Transition<E>(props: ITransitionProps<E>): null {
   return null;
 }
@@ -280,6 +327,6 @@ export function Content({ children }: ContentProps): JSX.Element {
   return <>{children}</>;
 }
 
-export { mechanism } from './mechanism';
+export { MachineProvider, MachineContext } from './context';
 
-export { default as Mechanism } from './mechanism';
+export { default as useMachine } from './context';
