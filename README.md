@@ -10,7 +10,7 @@ An declarative state machine to react.
 ![GitHub all releases](https://img.shields.io/github/downloads/javierlopezdeancos/react-against-the-machine/total)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/javierlopezdeancos/react-against-the-machine/publish-react-against-the-machine-in-npm-on-release)
 ![Coverage](coverage/shields/coverage.svg)
-![npm](https://img.shields.io/npm/v/erre-ele)
+![npm](https://img.shields.io/npm/v/react-against-the-machine)
 
 ## Summary
 
