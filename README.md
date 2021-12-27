@@ -1,5 +1,5 @@
 ![[React against the machine]](assets/logo_small.jpg#gh-light-mode-only)
-![[React against the machine]](assets/logo_small_black.jpg#gh-dark-mode-only)
+![[React against the machine]](assets/logo_small_black.png#gh-dark-mode-only)
 
 An declarative state machine to react.
 
