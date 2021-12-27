@@ -4,18 +4,10 @@ interface IComponentsProps {
   id: string;
 }
 
-export function ComponentA(props: IComponentsProps): JSX.Element {
+export default function ComponentMock(props: IComponentsProps): JSX.Element {
   return (
     <div data-testid={props?.id}>
-      <h1>You are in component A</h1>
-    </div>
-  );
-}
-
-export function ComponentB(props: IComponentsProps): JSX.Element {
-  return (
-    <div data-testid={props?.id}>
-      <h1>You are in component B</h1>
+      <h1>You are in {props?.id}</h1>
     </div>
   );
 }
