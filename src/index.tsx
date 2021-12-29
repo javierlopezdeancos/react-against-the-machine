@@ -24,9 +24,15 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
   const mounted = useRef(false);
   const machine = useMachine();
 
-  const isPathNameHostRoot = useCallback(() => rl.pathname === '' || rl.pathname === '/', [rl.pathname]);
+  const isPathNameHostRoot = useCallback((): boolean => {
+    const pathname = rl.getPathnameFromURL();
+    return pathname === '' || pathname === '/';
+  }, [rl.getPathnameFromURL]);
 
-  const isPathNameInitialState = useCallback(() => rl.pathname === '/' + initial, [rl.pathname, initial]);
+  const isPathNameInitialState = useCallback((): boolean => {
+    const pathname = rl.getPathnameFromURL();
+    return pathname === '/' + initial;
+  }, [rl.getPathnameFromURL, initial]);
 
   const getStateIdFromURL = useCallback((): string => {
     const pathname = rl.getPathnameFromURL();
@@ -57,9 +63,20 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
 
       const nextState = machine.getState(nextStateId);
 
+      if (nextState?.params) {
+        nextState?.params.forEach(function (value, key) {
+          const paramValue = rl.getParamFromURL(key);
+
+          if (paramValue) {
+            machine.setStateParamValue(nextState.id, key, paramValue);
+          }
+        });
+
+        machine.updateState(nextState);
+      }
+
       if (nextState?.onEnter) {
-        const params = getCurrentStateParamsFromURL();
-        nextState?.onEnter(params);
+        nextState?.onEnter(nextState?.params);
       }
     }
   }, [
@@ -72,35 +89,6 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
     isPathNameInitialState,
   ]);
 
-  const getCurrentStateParamsFromURL = useCallback((): Map<string, string> | undefined => {
-    const stateId = machine.currentId;
-
-    if (!stateId) {
-      return;
-    }
-
-    const state = machine.getState(stateId);
-    const params = new Map();
-
-    if (!state?.params) {
-      return;
-    }
-
-    state?.params?.forEach((paramName: string) => {
-      const paramValue = rl.getParamFromURL(paramName);
-
-      if (paramName && paramValue) {
-        params?.set(paramName, paramValue);
-      }
-    });
-
-    if (params.size === 0) {
-      return;
-    }
-
-    return params;
-  }, [machine.currentId, machine.getState, rl.getParamFromURL]);
-
   const storeStateAndTransition = useCallback(
     (
       stateId: string,
@@ -112,10 +100,18 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
       toOnEnter?: (data?: unknown) => void
     ): MachineState | undefined => {
       if (stateId && event && toStateId) {
+        const paramsMap = new Map();
+
+        if (params && params.length > 0) {
+          params?.map((paramName: string) => {
+            paramsMap.set(paramName, undefined);
+          });
+        }
+
         machine.addState({
           id: stateId,
           isPrivate,
-          params,
+          params: paramsMap,
           onEnter,
           to: [] as MachineTransition[],
         });
@@ -143,10 +139,18 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
       content: JSX.Element
     ) => {
       if (stateId) {
+        const paramsMap = new Map();
+
+        if (params && params.length > 0) {
+          params?.map((paramName: string) => {
+            paramsMap.set(paramName, undefined);
+          });
+        }
+
         machine.addState({
           id: stateId,
           isPrivate,
-          params,
+          params: paramsMap,
           onEnter,
           to: [] as MachineTransition[],
         });

@@ -11,7 +11,7 @@ export type Transition<E = unknown> = {
 export type State<E = unknown> = {
   id: string;
   isPrivate?: boolean;
-  params?: string[];
+  params?: Map<string, string>;
   to: Transition<E>[];
   content?: JSX.Element;
   onEnter?: (params?: Map<string, string>) => void;
@@ -40,7 +40,9 @@ export interface IMachine {
   setCurrentId: (sid: string) => void;
   setContent: (sid: string, c: JSX.Element) => void;
   addState: (s: State) => void;
+  updateState: (s: State) => void;
   setTransition: (sid: string, t: Transition) => void;
+  setStateParamValue: (stateId: string, paramName: string, paramValue: string) => void;
 }
 
 const defaultState: IMachine = {
@@ -61,7 +63,9 @@ const defaultState: IMachine = {
   setCurrentId: (): void => {},
   setContent: (): void => {},
   addState: (): void => {},
+  updateState: (): void => {},
   setTransition: (): void => {},
+  setStateParamValue: (): void => {},
 };
 
 const MachineContext = createContext(defaultState);
@@ -78,18 +82,19 @@ class MachineProvider extends React.Component {
   setCurrentId = (cid?: string): void => {
     if (cid) {
       const currentContent = this.getContent(cid);
+      const prevId = this.state.currentId;
 
       this.setState({
         ...this.state,
         currentId: cid,
         currentContent,
-        prevId: this.state.currentId,
+        prevId,
       });
     }
   };
 
   hasStates = (): boolean => {
-    if (this?.state && this.state?.states && this.state?.states?.length === 0) {
+    if (this?.state?.states?.length === 0) {
       return false;
     }
 
@@ -97,16 +102,32 @@ class MachineProvider extends React.Component {
   };
 
   addState = (s: State): void => {
-    const state = this.getState(s.id);
+    const hasStates = this.hasStates();
 
-    if (state) {
+    if (!hasStates) {
+      this.state.states.push(s);
       return;
     }
 
-    this.setState({
-      ...this.state,
-      states: this?.state?.states?.push(s),
-    });
+    const stateIsStored = this.getState(s.id);
+
+    if (stateIsStored) {
+      return;
+    }
+
+    this.state.states.push(s);
+  };
+
+  updateState = (s: State): void => {
+    this.state.states.map(
+      (st): State => {
+        if (s.id === st.id) {
+          st = s;
+        }
+
+        return st;
+      }
+    );
   };
 
   removeState = (sid: string): void => {
@@ -121,15 +142,16 @@ class MachineProvider extends React.Component {
   getState = (sid: string): State | undefined => {
     const hasStates = this.hasStates();
 
-    if (hasStates) {
-      return this.state?.states?.find((s) => s.id === sid);
+    if (!hasStates) {
+      return undefined;
     }
 
-    return undefined;
+    const statesCopy = [...this.state.states];
+    return statesCopy.find((s) => s.id === sid);
   };
 
   setTransition = (sid: string, t: Transition): void => {
-    const statesWithTransition = this.state.states?.map(
+    this.state.states.map(
       (s): State => {
         if (s.id === sid) {
           s?.to?.push(t);
@@ -138,11 +160,6 @@ class MachineProvider extends React.Component {
         return s;
       }
     );
-
-    this.setState({
-      ...this.state,
-      states: statesWithTransition,
-    });
   };
 
   getTransition = (sid: string, tid: string): Transition | undefined => {
@@ -156,7 +173,7 @@ class MachineProvider extends React.Component {
   };
 
   setContent = (sid: string, c: JSX.Element) => {
-    const statesWithContent = this.state.states?.map(
+    this.state.states.map(
       (s): State => {
         if (s.id === sid && c) {
           s.content = c;
@@ -165,11 +182,6 @@ class MachineProvider extends React.Component {
         return s;
       }
     );
-
-    this.setState({
-      ...this.state,
-      states: statesWithContent,
-    });
   };
 
   getContent = (sid: string): JSX.Element | undefined => {
@@ -185,8 +197,8 @@ class MachineProvider extends React.Component {
   getStateByEvent = (te: string): State | undefined => {
     let state;
 
-    if (this?.state?.states && this.state.states?.length > 0) {
-      this?.state?.states.forEach((s: State): void => {
+    if (this.state.states && this.state.states.length > 0) {
+      this.state.states.forEach((s: State): void => {
         if (s?.to && s?.to?.length > 0) {
           s.to.forEach((t: Transition): void => {
             if (t?.event === te) {
@@ -205,8 +217,8 @@ class MachineProvider extends React.Component {
   getTransitionByEvent = (te: string): Transition | undefined => {
     let transition;
 
-    if (this?.state?.states && this.state.states?.length > 0) {
-      this?.state?.states.forEach((s: State): void => {
+    if (this.state.states && this.state.states.length > 0) {
+      this.state.states.forEach((s: State): void => {
         if (s?.to && s?.to?.length > 0) {
           s.to.forEach((t: Transition): void => {
             if (t?.event === te) {
@@ -222,6 +234,26 @@ class MachineProvider extends React.Component {
 
   isPrivate = (s: State): boolean => {
     return s?.isPrivate || false;
+  };
+
+  setStateParamValue = (stateId: string, paramName: string, paramValue: string): void => {
+    const state = this.getState(stateId);
+
+    if (!state) {
+      return;
+    }
+
+    if (!state?.params) {
+      return;
+    }
+
+    state.params.forEach(function (value, key) {
+      if (key === paramName && state?.params?.set) {
+        state.params.set(key, paramValue);
+      }
+    });
+
+    this.updateState(state);
   };
 
   clear = (): void => {
@@ -256,7 +288,9 @@ class MachineProvider extends React.Component {
           setCurrentId: this.setCurrentId,
           setContent: this.setContent,
           addState: this.addState,
+          updateState: this.updateState,
           setTransition: this.setTransition,
+          setStateParamValue: this.setStateParamValue,
           clear: this.clear,
         }}
       >
