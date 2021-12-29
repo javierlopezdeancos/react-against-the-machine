@@ -216,11 +216,24 @@ A react component that represents a state of the state machine.
 - Any state should have a content react component to render.
 
 ```tsx
-import { State } from 'react-against-the-machine';
+import Machine, { MachineProvider, State } from 'react-against-the-machine';
+// import { laGuaGua as bus } from 'laguagua';
 
+{
+  /*
+<MachineProvider>
+  <Machine initial="componentA" bus={bus} logged={false}>
+*/
+}
 <State id="componentA" private={false}>
-  <!-- here should be the state machine States -->
-</State>
+  {/* here should be the state transition and the state content */}
+</State>;
+{
+  /*
+  </Machine>
+</MachineProvider>
+*/
+}
 ```
 
 #### State props
@@ -229,6 +242,37 @@ State needs some props:
 
 - **id** `string` - the state id to this state.
 - **private** `boolean` _(default true)_ - if is private, the state only render the content if user is logged.
+- **params** `string[]` - params that could be read in url when machine state transition to this state and come back as a param when `onEnter` callback will be executed in the State lifecycle.
+- **onEnter** `(params?: Map<string, string>) => void` - is execute when the new State is mounted, come back params specified to be read in URL like a key/value map.
+
+##### Example
+
+```tsx
+import Machine, { MachineProvider, State } from 'react-against-the-machine';
+// import { laGuaGua as bus } from 'laguagua';
+
+const handlerEnterOnStateA = (params?: Map<string, string>): void => {
+  console.log(`enter on sign up wit ${params?.get('code')} params`);
+};
+
+{
+  /*
+<MachineProvider>
+  <Machine initial="componentA" bus={bus} logged={false}>
+*/
+}
+<State id="A" private={false} params={['code']} onEnter={handlerEnterOnStateA}>
+  {/* here should be the state transition and the state content */}
+</State>;
+{
+  /*
+  </Machine>
+</MachineProvider>
+*/
+}
+```
+
+Then if user or state machine try to access to `{HOST}/A?code="123"` , we could get the code value when onEnter state callback was executed.
 
 ### Transition
 
@@ -325,4 +369,12 @@ You could build and run the real example that we have [here](src/example-ratm/sr
 cd src/example-ratm
 npm i
 npm start
+```
+
+#### Read params from url
+
+Put follow URL in your local browser to read code param in url
+
+```
+http://localhost:3000/State3?code="123"
 ```
