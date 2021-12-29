@@ -8,7 +8,7 @@ export declare type Transition<E = unknown> = {
 export declare type State<E = unknown> = {
     id: string;
     isPrivate?: boolean;
-    params?: string[];
+    params?: Map<string, string>;
     to: Transition<E>[];
     content?: JSX.Element;
     onEnter?: (params?: Map<string, string>) => void;
@@ -35,7 +35,9 @@ export interface IMachine {
     setCurrentId: (sid: string) => void;
     setContent: (sid: string, c: JSX.Element) => void;
     addState: (s: State) => void;
+    updateState: (s: State) => void;
     setTransition: (sid: string, t: Transition) => void;
+    setStateParamValue: (stateId: string, paramName: string, paramValue: string) => void;
 }
 declare const MachineContext: React.Context<IMachine>;
 declare class MachineProvider extends React.Component {
@@ -49,6 +51,7 @@ declare class MachineProvider extends React.Component {
     setCurrentId: (cid?: string | undefined) => void;
     hasStates: () => boolean;
     addState: (s: State) => void;
+    updateState: (s: State) => void;
     removeState: (sid: string) => void;
     getState: (sid: string) => State | undefined;
     setTransition: (sid: string, t: Transition) => void;
@@ -58,6 +61,7 @@ declare class MachineProvider extends React.Component {
     getStateByEvent: (te: string) => State | undefined;
     getTransitionByEvent: (te: string) => Transition | undefined;
     isPrivate: (s: State) => boolean;
+    setStateParamValue: (stateId: string, paramName: string, paramValue: string) => void;
     clear: () => void;
     render(): JSX.Element;
 }
