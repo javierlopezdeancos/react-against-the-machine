@@ -64,6 +64,7 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
       const nextState = machine.getState(nextStateId);
 
       if (nextState?.params) {
+        // @ts-expect-error
         nextState?.params.forEach(function (value, key) {
           const paramValue = rl.getParamFromURL(key);
 

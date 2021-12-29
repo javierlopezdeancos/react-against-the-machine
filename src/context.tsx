@@ -247,6 +247,7 @@ class MachineProvider extends React.Component {
       return;
     }
 
+    // @ts-expect-error
     state.params.forEach(function (value, key) {
       if (key === paramName && state?.params?.set) {
         state.params.set(key, paramValue);
