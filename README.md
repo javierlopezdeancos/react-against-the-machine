@@ -303,8 +303,8 @@ A react component that render a react component that be wrapper by when machine 
 
 ```mermaid
 stateDiagram-v2
-  stateA --> stateB: go-to-componentB
-  stateB--> stateA: go-to-componentA
+  componentA --> componentB: go-to-componentB
+  componentB--> componentA: go-to-componentA
 ```
 
 ```tsx
