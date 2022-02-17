@@ -301,22 +301,10 @@ A react component that render a react component that be wrapper by when machine 
 
 ### Basic example
 
-```
-           ┌─────────────────────┐                   ┌───────────────────┐
-           │                     │                   │                   │
-           │                     │ go:to:componentB  │                   │
-  ┌───────►│     StateA          ├──────────────────►│      StateB       ├────────┐
-  │        │                     │                   │                   │        │
-  │        │                     │                   │                   │        │
-  │        └─────────────────────┘                   └───────────────────┘        │
-  │                                                                               │
-  │                                                                               │
-  │                                                                               │
-  │                                                                               │
-  │                                                                               │
-  └───────────────────────────────────────────────────────────────────────────────┘
-                                 go:to:componentA
-
+```mermaid
+stateDiagram-v2
+  stateA --> stateB: go-to-componentB
+  stateB--> stateA: go-to-componentA
 ```
 
 ```tsx
