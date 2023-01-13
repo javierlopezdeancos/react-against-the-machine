@@ -167,7 +167,8 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
   }, [bus]);
 
   const runMachineOnPopBrowserHistory = useCallback(
-    (browserHistoryPopEvent?) => {
+    // eslint-disable-next-line
+    (browserHistoryPopEvent?: any) => {
       const isABrowserHistoryEventWithAValidPathname =
         browserHistoryPopEvent && browserHistoryPopEvent?.currentTarget?.document?.location?.pathname;
 

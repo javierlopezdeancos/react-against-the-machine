@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { PropsWithChildren, createContext, useContext } from 'react';
 
 export type OnEnterDataResponse<D = unknown> = (data?: D) => void;
 
@@ -70,7 +70,7 @@ const defaultState: IMachine = {
 
 const MachineContext = createContext(defaultState);
 
-class MachineProvider extends React.Component {
+class MachineProvider extends React.Component<PropsWithChildren> {
   state = {
     prevId: undefined,
     currentId: undefined,
