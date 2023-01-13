@@ -119,15 +119,13 @@ class MachineProvider extends React.Component {
   };
 
   updateState = (s: State): void => {
-    this.state.states.map(
-      (st): State => {
-        if (s.id === st.id) {
-          st = s;
-        }
-
-        return st;
+    this.state.states.map((st): State => {
+      if (s.id === st.id) {
+        st = s;
       }
-    );
+
+      return st;
+    });
   };
 
   removeState = (sid: string): void => {
@@ -151,15 +149,13 @@ class MachineProvider extends React.Component {
   };
 
   setTransition = (sid: string, t: Transition): void => {
-    this.state.states.map(
-      (s): State => {
-        if (s.id === sid) {
-          s?.to?.push(t);
-        }
-
-        return s;
+    this.state.states.map((s): State => {
+      if (s.id === sid) {
+        s?.to?.push(t);
       }
-    );
+
+      return s;
+    });
   };
 
   getTransition = (sid: string, tid: string): Transition | undefined => {
@@ -173,15 +169,13 @@ class MachineProvider extends React.Component {
   };
 
   setContent = (sid: string, c: JSX.Element) => {
-    this.state.states.map(
-      (s): State => {
-        if (s.id === sid && c) {
-          s.content = c;
-        }
-
-        return s;
+    this.state.states.map((s): State => {
+      if (s.id === sid && c) {
+        s.content = c;
       }
-    );
+
+      return s;
+    });
   };
 
   getContent = (sid: string): JSX.Element | undefined => {
