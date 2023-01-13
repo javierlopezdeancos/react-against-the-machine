@@ -33,6 +33,7 @@
       "src/*.{ts,tsx}"
     ],
     "testEnvironment": "jsdom",
+    "testRunner": "jest-circus/runner",
     "transform": {
       ".(ts|tsx)": "ts-jest"
     },
