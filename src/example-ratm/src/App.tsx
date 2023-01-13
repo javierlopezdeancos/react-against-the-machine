@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { laGuaGua as bus } from 'laguagua';
 
 import Machine, { MachineProvider, State, Transition, Content } from '../../index';
