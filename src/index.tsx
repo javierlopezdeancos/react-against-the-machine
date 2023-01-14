@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useEffect, useCallback, useMemo, useRef, PropsWithChildren, FC } from 'react';
 
 import rl from 'erre-ele';
 import useMachine, { State as MachineState, Transition as MachineTransition, OnEnterDataResponse } from './context';
@@ -305,14 +305,13 @@ export default function Machine(props: IStateMachineProps): JSX.Element {
 interface IStateProps {
   id: string;
   private: boolean;
-  children: JSX.Element[];
   params?: string[];
   onEnter?: (params?: Map<string, string>) => void;
 }
 
-export function State({ children }: IStateProps): JSX.Element {
+export const State: FC<PropsWithChildren<IStateProps>> = ({ children }): JSX.Element => {
   return <>{children}</>;
-}
+};
 
 interface ITransitionProps<E> {
   event: string;
@@ -321,17 +320,13 @@ interface ITransitionProps<E> {
 }
 
 // @ts-expect-error
-export function Transition<E>(props: ITransitionProps<E>): null {
+export const Transition = <E extends unknown>({ event, state, onEnter }: ITransitionProps<E>): null => {
   return null;
-}
+};
 
-interface ContentProps {
-  children: JSX.Element;
-}
-
-export function Content({ children }: ContentProps): JSX.Element {
+export const Content: FC<PropsWithChildren> = ({ children }): JSX.Element => {
   return <>{children}</>;
-}
+};
 
 export { MachineProvider, MachineContext } from './context';
 
