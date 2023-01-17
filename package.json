@@ -1,6 +1,12 @@
 {
   "name": "react-against-the-machine",
   "version": "0.2.0",
+  "license": "MIT",
+  "author": {
+    "name": "Javier Lopez de Ancos",
+    "email": "javierlopezdeancos@outlook.com",
+    "url": "https://javierlopezdeancos.dev/"
+  },
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
   "types": "./lib/esm/index.d.ts",
@@ -56,8 +62,6 @@
     "state machine",
     "react"
   ],
-  "author": "Javier Lopez de Ancos",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/javierlopezdeancos/react-against-the-machine/issues"
   },
